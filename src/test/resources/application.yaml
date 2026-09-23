@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: CONTRACTS
+  embedded:
+    kafka:
+      brokers: http://localhost:9999
+  liquibase:
+    drop-first: true
+    change-log: classpath:/liquibase/changelog-master.yaml
+  kafka:
+    client-user: user
+    bootstrap-servers: ${spring.embedded.kafka.brokers}
+    consumer:
+      group-id: contract-id
+    topics:
+      sign-contract-request: sign-contract-req
+      sign-contract-request-dlt: sign-contract-req-dlt
+      sign-contract-response: sign-contract-resp
+      sign-contract-response-dlt: sign-contract-resp-dlt
+      status-update: status-update
+      status-update-dlt: status-update-dlt
+      search-contract-request: search-contract-req
+      search-contract-request-dlt: search-contract-req-dlt
+      search-contract-response: search-contract-resp
+      search-contract-response-dlt: search-contract-resp-dlt
+      create-contract-request: create-contract-request
+      create-contract-request-dlt: create-contract-request-dlt
+      create-contract-response: create-contract-response
+      create-contract-response-dlt: create-contract-response-dlt
+    properties:
+      security.protocol: SASL_PLAINTEXT
+      sasl.mechanism: PLAIN
+      sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="user1" password="12345"
+    jaas:
+      options:
+        password: 12345
+  external-services:
+    urls:
+      contract-agreement: http://localhost:8082
+      signer: http://localhost:8082
+      edc: http://localhost:8082
+      catalogSearch: http://localhost:8082
+      catalogGet: http://localhost:8082
+  mode: PROVIDER
+  api-key: test
+  profile: test
+  file-folder: testfolder

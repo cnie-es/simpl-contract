@@ -1,0 +1,76 @@
+deployment:
+  image:
+    # Published image of this fork. Override for builds published elsewhere, e.g.
+    # --set deployment.image.artifact=ghcr.io/<owner>/contract
+    artifact: ghcr.io/cnie-es/contract
+    # Empty means .Chart.AppVersion. Set it to deploy a specific build, e.g. a commit SHA tag.
+    tag: ""
+    pullPolicy: Always
+    # Names of pre-created image pull secrets. Required while the image is private.
+    pullSecrets: []
+  replicas: 1
+  mode: PROVIDER
+  # Provider-side gate: hold paid offerings until the payment is confirmed through the UI.
+  # Only effective when mode is PROVIDER. Free offerings are always signed automatically.
+  paymentApproval:
+    enabled: false
+    expirationDays: 7
+    checkIntervalMs: 3600000
+  db:
+    url: jdbc:postgresql://postgresql.be-common.svc.cluster.local/simpl_contract
+    user: postgres
+  kafka:
+    bootstrapServer: kafka.be-common.svc.cluster.local:9092
+    clientUser: user1
+    securityProtocol: SASL_PLAINTEXT
+    sasl:
+      mechanism: PLAIN
+    topics:
+      signContractRequest: sign-contract-req
+      signContractRequestDLT: sign-contract-req-dlt
+      signContractResponse: sign-contract-resp
+      signContractResponseDLT: sign-contract-resp-dlt
+      statusUpdate: status-update
+      statusUpdateDLT: status-update-dlt
+      searchContractRequest: search-contract-req
+      searchContractRequestDLT: search-contract-req-dlt
+      searchContractResponse: search-contract-resp
+      searchContractResponseDLT: search-contract-resp-dlt
+      createContractRequest: create-contract-req
+      createContractRequestDLT: create-contract-req-dlt
+      createContractResponse: create-contract-resp
+      createContractResponseDLT: create-contract-resp-dlt
+  urls:
+    stubs: 'http://simpl-stubs:8080'
+    edc: 'http://simpl-stubs:8080'
+    catalogSearch: 'https://adapter.dev.simpl-europe.eu/'
+    catalogGet: 'https://fc-server.dev.simpl-europe.eu/'
+  vault:
+    hashicorp:
+      role: ""
+      service: "https://vault.tools.simpl-europe.eu/"
+      secretEngine: kv
+      secretConfigPath: "{{ .Values.deployment.vault.hashicorp.secretEngine }}/contract"
+  otel:
+    endpoint: "http://collector.common01.dev.simpl-europe.eu/"
+
+environment: default
+resources:
+  requests:
+    memory: "300Mi"
+    cpu: "150m"
+  limits:
+    memory: "700Mi"
+    cpu: "300m"
+
+probe:
+  endpoint: "/contract/v1/health"
+  scheme: HTTP
+  port: 8080
+
+ingress:
+   enabled: false
+   annotations:
+     kubernetes.io/ingress.class: nginx
+   hosts: []
+   tls: []

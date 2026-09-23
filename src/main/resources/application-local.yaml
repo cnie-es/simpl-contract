@@ -1,0 +1,63 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/simpl_contract
+    username: postgres
+  kafka:
+    bootstrap-servers: http://localhost:9094
+    client-user: user1
+    consumer:
+      group-id: contract-id
+    topics:
+      sign-contract-request: sign-contract-req
+      sign-contract-request-dlt: sign-contract-req-dlt
+      sign-contract-response: sign-contract-resp
+      sign-contract-response-dlt: sign-contract-resp-dlt
+      status-update: status-update
+      status-update-dlt: status-update-dlt
+      search-contract-request: search-contract-request
+      search-contract-request-dlt: search-contract-request-dlt
+      search-contract-response: search-contract-response
+      search-contract-response-dlt: search-contract-response-dlt
+      create-contract-request: create-contract-request
+      create-contract-request-dlt: create-contract-request-dlt
+      create-contract-response: create-contract-response
+      create-contract-response-dlt: create-contract-response-dlt
+    properties:
+      security.protocol: SASL_PLAINTEXT
+      sasl.mechanism: PLAIN
+      sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="user1" password="${KAFKA_CLIENT_PASSWORDS}"
+    jaas:
+      options:
+        password: ${KAFKA_CLIENT_PASSWORDS}
+  external-services:
+    urls:
+      signer: http://localhost:8091
+      edc: http://localhost:8091
+      contract-agreement: http://localhost:8091
+      catalogSearch: 'https://adapter.dev.simpl-europe.eu/'
+      catalogGet: 'https://fc-server.dev.simpl-europe.eu/'
+  profile: local
+  mode: PROVIDER
+  api-key: test
+contract:
+  payment-approval:
+    enabled: true
+    expiration-days: 7
+    check-interval-ms: 3600000
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+      base-path: /contract/v1
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+      show-components: always
+  health:
+    diskspace:
+      enabled: true
+    db:
+      enabled: true

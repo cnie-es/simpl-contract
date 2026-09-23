@@ -1,0 +1,82 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DBPASSWORD}
+    driver-class-name: org.postgresql.Driver
+  application:
+    name: CONTRACTS
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  liquibase:
+    enabled: true
+    change-log: classpath:/liquibase/changelog-master.yaml
+    default-schema: public
+  kafka:
+    client-user: ${KAFKA_CLIENT_USER}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVER}
+    consumer:
+      group-id: contract-id
+    topics:
+      sign-contract-request: ${TOPIC_SIGN_CONTRACT_REQUEST}
+      sign-contract-request-dlt: ${TOPIC_SIGN_CONTRACT_REQUEST_DLT}
+      sign-contract-response: ${TOPIC_SIGN_CONTRACT_RESPONSE}
+      sign-contract-response-dlt: ${TOPIC_SIGN_CONTRACT_RESPONSE_DLT}
+      status-update: ${TOPIC_STATUS_UPDATE}
+      status-update-dlt: ${TOPIC_STATUS_UPDATE_DLT}
+      search-contract-request: ${TOPIC_SEARCH_CONTRACT_REQUEST}
+      search-contract-request-dlt: ${TOPIC_SEARCH_CONTRACT_REQUEST_DLT}
+      search-contract-response: ${TOPIC_SEARCH_CONTRACT_RESPONSE}
+      search-contract-response-dlt: ${TOPIC_SEARCH_CONTRACT_RESPONSE_DLT}
+      create-contract-request: ${TOPIC_CREATE_CONTRACT_REQUEST}
+      create-contract-request-dlt: ${TOPIC_CREATE_CONTRACT_REQUEST_DLT}
+      create-contract-response: ${TOPIC_CREATE_CONTRACT_RESPONSE}
+      create-contract-response-dlt: ${TOPIC_CREATE_CONTRACT_RESPONSE_DLT}
+    properties:
+      security.protocol: ${KAFKA_SECURITY_PROTOCOL}
+      sasl.mechanism: ${KAFKA_SASL_MECHANISM}
+      sasl.jaas.config: ${KAFKA_SASL_JAAS_CONFIG}
+    jaas:
+      options:
+        password: ${KAFKA_CLIENT_PASSWORDS}
+  external-services:
+    urls:
+      signer: ${STUBS_URL}
+      contract-agreement: ${STUBS_URL}
+      edc: ${EDC_URL}
+      catalogSearch: ${CATALOG_SEARCH_URL}
+      catalogGet: ${CATALOG_GET_URL}
+  mode: ${MODE}
+  api-key: ${API_KEY}
+  profile: default
+  file-folder: files
+contract:
+  payment-approval:
+    # When true (provider side only), paid offerings are held until the payment is confirmed
+    # via the UI. Free offerings keep being signed automatically.
+    enabled: ${PAYMENT_APPROVAL_ENABLED:false}
+    # Max days a paid offering may wait for payment confirmation before being auto-rejected.
+    expiration-days: ${PAYMENT_APPROVAL_EXPIRATION_DAYS:7}
+    # How often (ms) the expiration sweep runs.
+    check-interval-ms: ${PAYMENT_APPROVAL_CHECK_INTERVAL_MS:3600000}
+management:
+  server:
+    port: 8080
+  endpoints:
+    web:
+      exposure:
+        include: health
+      base-path: /contract/v1
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+      show-components: always
+  health:
+    diskspace:
+      enabled: true
+    db:
+      enabled: true

@@ -1,0 +1,9 @@
+apiVersion: v2
+name: simpl-contract
+description: A Helm chart for Kubernetes
+type: application
+# Upstream left these as ${PROJECT_RELEASE_VERSION}, substituted by the GitLab pipeline that is not
+# part of this fork, which made the chart fail to load outside that pipeline. They now carry the
+# real version; CI can still override both with `helm package --version --app-version`.
+version: 2.9.0-edval
+appVersion: "2.9.0-edval"

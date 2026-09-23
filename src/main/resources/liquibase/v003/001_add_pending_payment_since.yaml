@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: v003-001-add-pending-payment-since
+      author: simpl
+      changes:
+        - addColumn:
+            tableName: contract_agreements
+            columns:
+              - column:
+                  name: pending_payment_since
+                  type: timestamp

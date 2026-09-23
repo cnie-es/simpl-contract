@@ -1,0 +1,17 @@
+{
+  "totalCount": 1,
+  "items": [
+    {
+      "n": {
+        "claimsGraphUri": [
+          "did:web:registry.gaia-x.eu:DataOffering:dddc2fa4-a18e-4da0-b2d1-a70373d9d4e4777"
+        ],
+        "offeringType": "data",
+        "name": "szym777",
+        "description": "An example dataset",
+        "inLanguage": "da",
+        "serviceAccessPoint": "https://example.com"
+      }
+    }
+  ]
+}

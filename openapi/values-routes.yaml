@@ -1,0 +1,15 @@
+# Tier 1 gateway
+appConfig:
+  routes:
+    logging:
+      business:
+        - method: POST
+          path: /credentials/agreements/{contractAgreementId}/definitions/{contractDefinitionId}
+          config:
+            operations:
+              - ISSUE_CONTRACT
+        - method: PATCH
+          path: /agreements/{contractAgreementId}/definitions/{contractDefinitionId}/status
+          config:
+            operations:
+              - SET_CONTRACT_STATUS

@@ -1,0 +1,28 @@
+{
+  "@context":[
+    "https://www.w3.org/2018/credentials/v1",
+    "https://schema.org",
+    "https://w3id.org/security/suites/jws-2020/v1",
+    "https://w3id.org/security/suites/ed25519-2020/v1"
+  ],
+  "credentialStatus":{
+    "id":"http://localhost:8081/v1/tenants/transit/status/1#849dcefc-350e-4083-9642-f0c2bdfb515f",
+    "statusListCredential":"http://localhost:8081/v1/tenants/transit/status/1",
+    "statusListIndex":1,
+    "statusPurpose":"revocation",
+    "type":"StatusList2021"
+  },
+  "credentialSubject":{
+    "hello":"world2"
+  },
+  "issuanceDate":"2024-10-01T10:09:52.788715126Z",
+  "issuer":"did:jwk:eyJjcnYiOiJFZDI1NTE5Iiwia2lkIjoiZWRrZXkiLCJrdHkiOiJPS1AiLCJ4IjoicWQtTWlvQmFVQ2VrM3h5NE1PNXpuVjNJWm5CRmlzRjRaa0ZHWWh0QllaYyJ9",
+  "proof":{
+    "created":"2024-10-01T10:09:53.220548418Z",
+    "proofPurpose":"assertionMethod",
+    "proofValue":"z4byXHNDw6FS37D3HVj2bApCfGQzNUmA7opvuNFe6maeKVz2R4kPfL83v4g3XVKH7xy5i6yYMCjxq8uenYqymWeh3",
+    "type":"Ed25519Signature2020",
+    "verificationMethod":"did:jwk:eyJjcnYiOiJFZDI1NTE5Iiwia2lkIjoiZWRrZXkiLCJrdHkiOiJPS1AiLCJ4IjoicWQtTWlvQmFVQ2VrM3h5NE1PNXpuVjNJWm5CRmlzRjRaa0ZHWWh0QllaYyJ9#0"
+  },
+  "type":"VerifiableCredential"
+}

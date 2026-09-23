@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - include:
+      file: liquibase/v001_initial/001_create_contract_agreement_table.yaml
+  - include:
+      file: liquibase/v001_initial/002_extend_contract_agreement_table.yaml
+  - include:
+      file: liquibase/v001_initial/003_change_contract_definition_id_type.yaml
+  - include:
+      file: liquibase/v002/001_create_human_readable_table.yaml
+  - include:
+      file: liquibase/v003/001_add_pending_payment_since.yaml

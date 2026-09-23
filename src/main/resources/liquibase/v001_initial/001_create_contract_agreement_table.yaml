@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Szymon
+      changes:
+        - createTable:
+            tableName: contract_agreements
+            columns:
+              - column:
+                  name: contract_agreement_id
+                  type: "uuid"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: contract_definition_id
+                  type: "uuid"
+              - column:
+                  name: consumer_signature_date
+                  type: timestamp
+              - column:
+                  name: provider_signature_date
+                  type: timestamp
+              - column:
+                  name: status
+                  type: text

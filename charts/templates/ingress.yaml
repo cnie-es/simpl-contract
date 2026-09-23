@@ -1,0 +1,58 @@
+{{- if .Values.ingress }}
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-ingress
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    {{- toYaml .Values.ingress.annotations | nindent 4 }}
+spec:
+  ingressClassName: nginx
+
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- else }}
+  tls:
+    - hosts:
+        - {{ printf "%s.%s.dev.simpl-europe.eu" .Release.Name .Release.Namespace | quote }}
+      secretName: xfsc-wildcard
+  {{- end }}
+
+  rules:
+    {{- if .Values.ingress.hosts | len | gt 0 }}
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathtype }}
+            backend:
+              service:
+                name: {{ .Release.Name }}
+                port:
+                  number: {{ .port }}
+          {{- end }}
+    {{- end }}
+    {{- else }}
+    - host: {{ printf "%s.%s.dev.simpl-europe.eu" .Release.Name .Release.Namespace | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Release.Name }}
+                port:
+                  number: 8080
+    {{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 4
+      author: Tomasz
+      changes:
+        - createTable:
+            tableName: human_readable
+            columns:
+              - column:
+                  name: contract_negotiation_id
+                  type: varchar(510)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: render_hash
+                  type: varchar(255)

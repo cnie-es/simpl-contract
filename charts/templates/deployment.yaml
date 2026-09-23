@@ -1,0 +1,151 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .Chart.Name }}
+    image-tag: {{ .Values.deployment.image.tag | default .Chart.AppVersion }}
+  name: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        deployment: {{ .Release.Name }}
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: {{ default (printf "contract-%s" .Release.Namespace) .Values.deployment.vault.hashicorp.role }}
+        {{- if and (hasKey .Values.deployment.vault "hashicorp") (hasKey .Values.deployment.vault.hashicorp "service") }}
+        vault.hashicorp.com/service: {{ .Values.deployment.vault.hashicorp.service }}
+        {{- end }}
+        vault.hashicorp.com/agent-inject-secret-config.txt: "{{ tpl .Values.deployment.vault.hashicorp.secretConfigPath . }}"
+        vault.hashicorp.com/agent-inject-template-config.txt: |
+          {{- $secretPath := tpl .Values.deployment.vault.hashicorp.secretConfigPath . -}}
+          {{- $template := printf (printf "{{`{{ with secret \"%s\" }}\n" $secretPath) -}}
+          {{- $template = printf "%s{{ range $k, $v := .Data.data }}\n" $template -}}
+          {{- $template = printf "%s  export {{ $k }}={{ $v }}\n" $template -}}
+          {{- $template = printf "%s{{ end }}\n" $template -}}
+          {{- $template = printf "%s{{ end }}`}}" $template -}}
+          {{- tpl $template . | nindent 10 }}
+    spec:
+      automountServiceAccountToken: true
+      serviceAccountName: {{ .Chart.Name }}-service-account
+      {{- with .Values.deployment.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Release.Name }}
+          image: "{{ .Values.deployment.image.artifact }}:{{ .Values.deployment.image.tag | default .Chart.AppVersion }}"
+          envFrom:
+            - configMapRef:
+                name: {{ .Chart.Name }}-configmap
+          command: [ "/bin/sh" ]
+          args: [ "-c", "ls -l /otel && chmod 755 /otel/elastic-otel-javaagent.jar && . /vault/secrets/config.txt && java -javaagent:/otel/elastic-otel-javaagent.jar -jar /simpl-contracts.jar" ]
+          env:
+            - name: OTEL_SERVICE_NAME
+              value: {{ .Chart.Name }}
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ .Values.deployment.otel.endpoint }}
+            - name: OTEL_LOGS_EXPORTER
+              value: "none"
+            - name: DB_URL
+              value: {{ .Values.deployment.db.url }}
+            - name: DB_USER
+              value: {{ .Values.deployment.db.user }}
+            - name: MODE
+              value: {{ .Values.deployment.mode }}
+            - name: KAFKA_BOOTSTRAP_SERVER
+              value: {{ .Values.deployment.kafka.bootstrapServer }}
+            - name: KAFKA_CLIENT_USER
+              value: {{ .Values.deployment.kafka.clientUser }}
+            - name: KAFKA_SECURITY_PROTOCOL
+              value: {{ .Values.deployment.kafka.securityProtocol }}
+            - name: KAFKA_SASL_MECHANISM
+              value: {{ .Values.deployment.kafka.sasl.mechanism }}
+            - name: KAFKA_SASL_JAAS_CONFIG
+              value: org.apache.kafka.common.security.plain.PlainLoginModule required username="{{ .Values.deployment.kafka.clientUser }}" password="${KAFKA_CLIENT_PASSWORDS}";
+            - name: STUBS_URL
+              value: {{ .Values.deployment.urls.stubs }}
+            - name: EDC_URL
+              value: {{ .Values.deployment.urls.edc }}
+            - name: CATALOG_SEARCH_URL
+              value: {{ .Values.deployment.urls.catalogSearch }}
+            - name: CATALOG_GET_URL
+              value: {{ .Values.deployment.urls.catalogGet }}
+            - name: PAYMENT_APPROVAL_ENABLED
+              value: "{{ .Values.deployment.paymentApproval.enabled }}"
+            - name: PAYMENT_APPROVAL_EXPIRATION_DAYS
+              value: "{{ .Values.deployment.paymentApproval.expirationDays }}"
+            - name: PAYMENT_APPROVAL_CHECK_INTERVAL_MS
+              value: "{{ .Values.deployment.paymentApproval.checkIntervalMs }}"
+            - name: JAVA_TOOL_OPTIONS
+              value: >-
+                -agentlib:jdwp=transport=dt_socket,address=9009,server=y,suspend=n
+            - name: TOPIC_SIGN_CONTRACT_REQUEST
+              value: {{ .Values.deployment.kafka.topics.signContractRequest }}-{{ lower .Values.deployment.mode }}
+            - name: TOPIC_SIGN_CONTRACT_REQUEST_DLT
+              value: {{ .Values.deployment.kafka.topics.signContractRequestDLT }}-{{ lower .Values.deployment.mode }}
+            - name: TOPIC_SIGN_CONTRACT_RESPONSE
+              value: {{ .Values.deployment.kafka.topics.signContractResponse }}-{{ lower .Values.deployment.mode }}
+            - name: TOPIC_SIGN_CONTRACT_RESPONSE_DLT
+              value: {{ .Values.deployment.kafka.topics.signContractResponseDLT }}-{{ lower .Values.deployment.mode }}
+            - name: TOPIC_STATUS_UPDATE
+              value: {{ .Values.deployment.kafka.topics.statusUpdate }}-{{ lower .Values.deployment.mode }}
+            - name: TOPIC_STATUS_UPDATE_DLT
+              value: {{ .Values.deployment.kafka.topics.statusUpdateDLT }}-{{ lower .Values.deployment.mode }}
+            - name: TOPIC_SEARCH_CONTRACT_REQUEST
+              value: {{ .Values.deployment.kafka.topics.searchContractRequest }}-{{ lower .Values.deployment.mode }}
+            - name: TOPIC_SEARCH_CONTRACT_REQUEST_DLT
+              value: {{ .Values.deployment.kafka.topics.searchContractRequestDLT }}-{{ lower .Values.deployment.mode }}
+            - name: TOPIC_SEARCH_CONTRACT_RESPONSE
+              value: {{ .Values.deployment.kafka.topics.searchContractResponse }}-{{ lower .Values.deployment.mode }}
+            - name: TOPIC_SEARCH_CONTRACT_RESPONSE_DLT
+              value: {{ .Values.deployment.kafka.topics.searchContractResponseDLT }}-{{ lower .Values.deployment.mode }}
+            - name: TOPIC_CREATE_CONTRACT_REQUEST
+              value: {{ .Values.deployment.kafka.topics.createContractRequest }}-{{ lower .Values.deployment.mode }}
+            - name: TOPIC_CREATE_CONTRACT_REQUEST_DLT
+              value: {{ .Values.deployment.kafka.topics.createContractRequestDLT }}-{{ lower .Values.deployment.mode }}
+            - name: TOPIC_CREATE_CONTRACT_RESPONSE
+              value: {{ .Values.deployment.kafka.topics.createContractResponse }}-{{ lower .Values.deployment.mode }}
+            - name: TOPIC_CREATE_CONTRACT_RESPONSE_DLT
+              value: {{ .Values.deployment.kafka.topics.createContractResponseDLT }}-{{ lower .Values.deployment.mode }}
+          resources:
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+          imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probe.endpoint }}
+              scheme: {{ .Values.probe.scheme }}
+              port:  {{ .Values.probe.port }}
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: {{ .Values.probe.endpoint }}
+              scheme: {{ .Values.probe.scheme }}
+              port:  {{ .Values.probe.port }}
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          startupProbe:
+            failureThreshold: 60
+            httpGet:
+              path: {{ .Values.probe.endpoint }}
+              scheme: {{ .Values.probe.scheme }}
+              port:  {{ .Values.probe.port }}
+            periodSeconds: 10

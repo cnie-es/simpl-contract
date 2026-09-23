@@ -1,0 +1,35 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2
+      author: Szymon
+      changes:
+        - addColumn:
+            tableName: contract_agreements
+            columns:
+              - column:
+                  name: contract_negotiation_id
+                  type: text
+        - addColumn:
+            tableName: contract_agreements
+            columns:
+              - column:
+                  name: asset_id
+                  type: text
+        - addColumn:
+            tableName: contract_agreements
+            columns:
+              - column:
+                  name: provider_id
+                  type: text
+        - addColumn:
+            tableName: contract_agreements
+            columns:
+              - column:
+                  name: consumer_id
+                  type: text
+        - addColumn:
+            tableName: contract_agreements
+            columns:
+              - column:
+                  name: contract_offer_id
+                  type: text
