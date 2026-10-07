@@ -32,7 +32,7 @@ spec:
           {{- tpl $template . | nindent 10 }}
     spec:
       automountServiceAccountToken: true
-      serviceAccountName: {{ .Chart.Name }}-service-account
+      serviceAccountName: {{ .Release.Name }}-service-account
       {{- with .Values.deployment.image.pullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -42,7 +42,7 @@ spec:
           image: "{{ .Values.deployment.image.artifact }}:{{ .Values.deployment.image.tag | default .Chart.AppVersion }}"
           envFrom:
             - configMapRef:
-                name: {{ .Chart.Name }}-configmap
+                name: {{ .Release.Name }}-configmap
           command: [ "/bin/sh" ]
           args: [ "-c", "ls -l /otel && chmod 755 /otel/elastic-otel-javaagent.jar && . /vault/secrets/config.txt && java -javaagent:/otel/elastic-otel-javaagent.jar -jar /simpl-contracts.jar" ]
           env:

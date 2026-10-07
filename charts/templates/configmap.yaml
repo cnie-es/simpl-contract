@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   labels:
     chart-version: {{ .Chart.Version }}
-  name: {{ .Chart.Name }}-configmap
+  name: {{ .Release.Name }}-configmap
 data:
   APP_NAME: "{{ .Chart.Name }}"
   SPRING_PROFILES_ACTIVE: "{{ .Values.environment }}"
