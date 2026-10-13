@@ -81,7 +81,7 @@ spec:
             - name: PAYMENT_APPROVAL_EXPIRATION_DAYS
               value: "{{ .Values.deployment.paymentApproval.expirationDays }}"
             - name: PAYMENT_APPROVAL_CHECK_INTERVAL_MS
-              value: "{{ .Values.deployment.paymentApproval.checkIntervalMs }}"
+              value: "{{ .Values.deployment.paymentApproval.checkIntervalMs | int64 }}"
             - name: JAVA_TOOL_OPTIONS
               value: >-
                 -agentlib:jdwp=transport=dt_socket,address=9009,server=y,suspend=n
